@@ -1,4 +1,4 @@
-# Replicating Github Search using Githib API
+# Replicating Github Search using Github API
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app) and utitlizes Fetch API to interact with the Github API.
 

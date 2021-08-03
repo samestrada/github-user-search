@@ -43,7 +43,6 @@ class Search extends Component{
     }
 
     handleClick(event) {
-        console.log("click event: ", event.target.id);
         this.setState({submitted: false})
         CURRENT_PAGE = event.target.id;
         this.fetchResults();
@@ -57,7 +56,6 @@ class Search extends Component{
             results: data,
             total_count: data.total_count
           });
-          console.log("GET fetch for ", this.state);
         })
     }
 
@@ -66,18 +64,13 @@ class Search extends Component{
     async getInfo(url, pos){
 
         //array holding star count, full name (if exists), and follower count in that order.
-        // console.log("tryna get some info for ", url);
         var fetched = {};
         var copyResults = [];
-
-        // console.log("COUNTER ", pos)
-        // console.log("State/Result ", this.state.results.items)
         copyResults = this.state.results.items;
-        // console.log("copy: ", copyResults);
         let items = {...copyResults};
-        // console.log("item: ", items);
         let item = items[pos];
 
+        //test against local data
         // fetch(TEST)
         // .then(res => res.json())
         // .then(data => {      
@@ -88,39 +81,24 @@ class Search extends Component{
         //     this.setState({results:copyResults});
             
         // })
+
         //fetch for both gen user url and starred url for number of starred repos -- execute in parallel and wait till complete
         Promise.all([
             fetch(url, ).then(res => res.json()),
             fetch(url + '/starred').then(res => { return res.json();})
         ]).then(([genUserData, starred]) => {
-            console.log("user: ", item);
-            console.log("data to be inserted: ", genUserData.followers)
             item['followers'] = genUserData.followers;
             item['stars'] = starred.length;
             item['repos'] = genUserData.public_repos;
             copyResults[pos] = item;
-            console.log("RESULTS UPDATED: ", copyResults)
             this.setState({results:copyResults});
         })
-        // console.log("Fetched length: ", fetched.length);
-
-        //workaround for fetched array returning before becoming populated
-        // if(!fetched.length){
-        //     console.log("waiting...");
-        //     setTimeout(function() { //Start the timer
-        //         console.log("Fetched array after wait: ", fetched);
-        //         return fetched; //After 0.5 second, return array
-        //     }.bind(this), 1000)
-        // } else{
-        // console.log("Fetched array: ", fetched);
-        // }
     }
 
 
     //logic for necessary page buttons to display results
     pagination(){
         if(this.state.results.total_count > 0){
-            // console.log("figuring out pagination...");
             //total page numbers to display
             for(let i  =  0; i < Math.ceil(this.state.results.total_count / PER_PAGE); i++){
                 this.state.pageNumbers.push(i+1);
@@ -137,12 +115,7 @@ class Search extends Component{
         if(this.state.results.items){
             return(<p>Loading...</p>)
         }
-        console.log("Results final: ", this.state.results)
-        console.log("Results items: ", this.state)
 
-        // this.state.results.items.map(item=>(
-        //     console.log(item.login)
-        // ))
         return(
             <> 
 
@@ -159,11 +132,6 @@ class Search extends Component{
                     </ListGroup.Item>
                     ))}
                 </ListGroup>
-            {/* <ListGroup>
-                {this.state.results.forEach(item => (
-                   <h1>{item.login}</h1>
-                ))}
-            </ListGroup> */}
 
             </>
         )
@@ -171,33 +139,21 @@ class Search extends Component{
 
     //This function fetches data for each user in the results list, and sets it up to be rendered after search
     returnResults(){
-        // var fetchLimiter = 0;
         var pos = 0;
         var limit = 0;
         (this.state.results.total_count < 25) ? limit = this.state.results.total_count : limit = 25;
 
         //for each user, call getInfo to learn follower/star count etc.
         if (typeof this.state.results.items !== "undefined") {
-            console.log("triggered false submit: ", this.state.results.items)
             this.setState({
                 submitted: false
             })
             this.state.results.items.forEach(element => {
-                //ensures we only go through fetch cycle once
-                // if (fetchLimiter < 3) {
-                //     console.log("limiter: ", fetchLimiter);
-                // if(typeof this.getInfo(element.url) !== "undefined"){
-                //     console.log("setting now!");
-                    // console.log("Working on element ", element.login);
-
                     this.getInfo(element.url, pos);
-                    // console.log("Did work? ", this.state.results.items);
-
                     pos++;
 
             });
 
-        console.log("HEY??????????????????????????", this.state.results.items)
         if(pos === limit){
             this.setState({
                 submitted: true
@@ -216,14 +172,6 @@ class Search extends Component{
     }
 
     render(){
-        console.log("Reloading... ");
-        console.log("Reload state: ", this.state.results);
-        //render search result count only if we have actual results
-        // if(typeof this.state.results.items !== "undefined" && this.state.refresh === 1){
-        //     console.log("DO WE EVER GET HERE ");
-            
-        //     this.resetState();
-        // }
 
         return(
             <div>
@@ -233,7 +181,6 @@ class Search extends Component{
                         name='q'
                         className='input'
                         placeholder='Search for users'
-                        // value={this.state.queryString}
                         onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()} //require submission through submit button
                         onChange={this.handleChange}
                         required
